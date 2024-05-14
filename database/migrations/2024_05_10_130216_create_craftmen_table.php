@@ -19,6 +19,8 @@ return new class extends Migration
             $table->integer('national_id');
             $table->integer('phone_numper');
             $table->timestamps();
+            $table->unsignedBigInteger('craft_id')->nullable();
+            $table->foreign("craft_id")->references('id')->on('craft')->onDelete('cascade');
         });
     }
 

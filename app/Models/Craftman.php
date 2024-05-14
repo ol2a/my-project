@@ -14,4 +14,7 @@ class Craftman extends Model
     protected $fillable = ['name' , 'email' ,'address' , 'national_id','phone_numper'];
 
     public $timestamps = true;
+    public function craft(){
+        return $this->belongsTo(craft::class);
+    }
 }

@@ -27,29 +27,39 @@ class CraftmanController extends Controller
      */
     public function index()
     {
-        $data = $this->CrudInterface->index([]);
-
-        return $this->success(status:HttpResponse::HTTP_OK , message:'data retrived' , data: $data);
+        $all = DB::table("craftmen")->get();
+        return $all ;
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CraftmanRequest $request)
+    public function store(Request $request)
     {
-        try{
-            DB::beginTransaction();
-
-            $data = $this->CrudInterface->store($request->validated());
-
-            DB::commit();
-
-            return $this->success(status:HttpResponse::HTTP_OK , message:'data retrived' , data: $data);
-
-        }catch(Exception $e){
-            DB::rollBack();
-            return $this->error(status:HttpResponse::HTTP_INTERNAL_SERVER_ERROR , message:$e->getMessage());
+        $new = $request->validate([
+            "name" =>"required" ,
+            "email" =>"required|email",
+            "address"=>"required" ,
+            "national_id" =>"required" ,
+            "phone_number" =>"required"
+        ]);
+        if($new){
+            $newMan = DB::table("craftmen")->insert([
+                "name" =>$request->name ,
+                "email"=>$request->email ,
+                "address" => $request->address ,
+                "national_id" =>$request->national_id ,
+                "phone_numper" => $request->phone_number
+        ]) ;
+                return $res = [
+                    "message" => "new craft man added" ,
+                    "status" => 200 ,
+                    "data" => $newMan
+                ];
+        }else{
+            return $message = "Error" ;
         }
+
     }
 
     /**
@@ -76,24 +86,26 @@ class CraftmanController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        try{
-            $data = $this->CrudInterface->show($id , []);
+        $update = $request->validate([
+            "name" =>"required" ,
+            "email" =>"required|email",
+            "address"=>"required" ,
+            "national_id" =>"required" ,
+            "phone_number" =>"required"
+        ]);
+        $updatecraftman = DB::table("craftmen")->where("id" , "=" , $id)->update([
+                "name" =>$request->name ,
+                "email"=>$request->email ,
+                "address" => $request->address ,
+                "national_id" =>$request->national_id ,
+                "phone_numper" => $request->phone_number
+        ]) ;
 
-            if(!$data){
-                return $this->error(status:HttpResponse::HTTP_INTERNAL_SERVER_ERROR , message:'data not found');
-            }
-
-            DB::beginTransaction();
-
-            $data->update($request->validated());
-
-            DB::commit();
-
-            return $this->success(status:HttpResponse::HTTP_OK , message:'data retrived' , data: $data);
-
-        }catch(Exception $e){
-            DB::rollBack();
-            return $this->error(status:HttpResponse::HTTP_INTERNAL_SERVER_ERROR , message:$e->getMessage());
+        if($updatecraftman){
+            return $message = "craft man data  updated";
+        }
+        else{
+            return $message = "failed to update" ;
         }
     }
 
@@ -102,6 +114,11 @@ class CraftmanController extends Controller
      */
     public function destroy(string $id)
     {
-
+       $getCraftman = DB::table("craftmen")->where("id" , "=" ,$id)->delete();
+       if($getCraftman){
+        return $message = "Deleted !" ;
+       }else{
+        return $message = "Error !" ;
+       }
     }
 }

@@ -25,27 +25,37 @@ class CraftController extends Controller
     }
     public function index()
     {
-        $data = $this->CrudInterface->index([]);
-
-        return $this->success(status:HttpResponse::HTTP_OK , message:'data retrived' , data: $data);
+        $crafts =DB::table('craft')->get();
+        if($crafts->count() !== 0){
+            return $response = [
+                "message" => "all crafts here " ,
+                "status" => 200 ,
+                "data" => $crafts
+            ];
+        }else{
+            return $message = "No Crafts here !" ;
+        }
     }
 
 
 
-    public function store(CrafRequest $request)
+    public function store(Request $request)
     {
-        try{
-            DB::beginTransaction();
+        $newCraft = $request->validate([
+            'name' => 'required|string'
+        ]);
+        if($newCraft){
+            DB::table("craft")->insert([
+                "name" => $request->name
+            ]) ;
 
-            $data = $this->CrudInterface->store($request->validated());
-
-            DB::commit();
-
-            return $this->success(status:HttpResponse::HTTP_OK , message:'data retrived' , data: $data);
-
-        }catch(Exception $e){
-            DB::rollBack();
-            return $this->error(status:HttpResponse::HTTP_INTERNAL_SERVER_ERROR , message:$e->getMessage());
+            return $response = [
+                "message" => "Craft added" ,
+                "status" => 200 ,
+                "data" => $newCraft
+            ] ;
+        }else{
+            return $message = "try again" ;
         }
     }
 
@@ -63,27 +73,24 @@ class CraftController extends Controller
     }
 
 
-    public function update(CrafRequest $request, string $id)
+    public function update(Request $request, string $id)
     {
-        try{
-            $data = $this->CrudInterface->show($id , []);
+        $craft = DB::table("craft")->where("id" , "=" , $id)->update([
+            "name" =>$request->name
+        ]);
 
-            if(!$data){
-                return $this->error(status:HttpResponse::HTTP_INTERNAL_SERVER_ERROR , message:'data not found');
-            }
-
-            DB::beginTransaction();
-
-            $data->update($request->validated());
-
-            DB::commit();
-
-            return $this->success(status:HttpResponse::HTTP_OK , message:'data retrived' , data: $data);
-
-        }catch(Exception $e){
-            DB::rollBack();
-            return $this->error(status:HttpResponse::HTTP_INTERNAL_SERVER_ERROR , message:$e->getMessage());
+        if($craft){
+            return $response = [
+                'message' =>"craft updated" ,
+                'data' => $craft
+            ];
+        }else{
+            return $res = "error";
         }
     }
-
+    public function destroy(string $id)
+    {
+        $find = DB::table("craft")->where("id" , "=" , $id)->delete();
+        return $message = "Craft Deleted !";
+}
 }

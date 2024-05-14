@@ -8,4 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class craft extends Model
 {
     use HasFactory;
+    public function craftman(){
+        return $this->hasMany(craftman::class);
+    }
 }

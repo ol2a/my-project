@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Api\V1\User;
 
 use App\Contracts\CrudInterface;
 use App\Http\Requests\Api\V1\User\UserRequest;
-use App\Http\Controllers\Api\V1\User\UserController
+// use App\Http\Controllers\Api\V1\User\UserController
+use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Traits\Response;
 use Exception;
@@ -99,6 +100,29 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
+
+
+            try {
+                $data = $this->CrudInterface->show($id , []);
+
+
+                if (!$data) {
+                    return $this->error(status: HttpResponse::HTTP_NOT_FOUND, message: 'data not found');
+                }
+
+                DB::beginTransaction();
+
+
+                $data->delete();
+
+                DB::commit();
+
+                return $this->success( status:HttpResponse::HTTP_OK , message:'data deleted successfully' , data: $data);
+            } catch (Exception $e) {
+                DB::rollBack();
+                return $this->error(status: HttpResponse::HTTP_INTERNAL_SERVER_ERROR, message: $e->getMessage());
+            }
+
 
 
     }
